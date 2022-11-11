@@ -91,13 +91,13 @@ module.exports = function leafletImage(map, callback) {
             size = bounds.getSize();
 
         var imageObj = new Image();
-        imageObj.src = imgOverlay._url;
         ctx.globalAlpha = (imgOverlay.options && imgOverlay.options.opacity) ? imgOverlay.options.opacity : 1;
 
         imageObj.onload = function () {
             ctx.drawImage(imageObj, bounds.min.x, bounds.min.y, size.x, size.y);
             callback(null, { canvas: canvas });
         };
+        imageObj.src = imgOverlay._url;
     } 
 
     function handleTileLayer(layer, callback) {

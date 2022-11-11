@@ -94,7 +94,7 @@ module.exports = function leafletImage(map, callback) {
         ctx.globalAlpha = (imgOverlay.options && imgOverlay.options.opacity) ? imgOverlay.options.opacity : 1;
 
         imageObj.onload = function () {
-            ctx.drawImage(imageObj, bounds.min.x, bounds.min.y, size.x, size.y);
+            ctx.drawImage(this, bounds.min.x, bounds.min.y, size.x, size.y);
             callback(null, { canvas: canvas });
         };
         imageObj.src = imgOverlay._url;

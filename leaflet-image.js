@@ -42,7 +42,11 @@ module.exports = function leafletImage(map, callback) {
     layerQueue.awaitAll(layersDone);
 
     function drawTileLayer(l) {
-        if (l instanceof L.TileLayer) layerQueue.defer(handleTileLayer, l);
+        if (l instanceof L.TileLayer) {
+        	layerQueue.defer(handleTileLayer, l);
+        } else if (l instanceof L.ImageOverlay) {
+            layerQueue.defer(handleImageOverlay, l);
+        }
         else if (l._heat) layerQueue.defer(handlePathRoot, l._canvas);
     }
 
@@ -73,6 +77,28 @@ module.exports = function leafletImage(map, callback) {
         });
         done();
     }
+    
+	function handleImageOverlay(imgOverlay, callback) {
+        var canvas = document.createElement('canvas');
+        canvas.width = dimensions.x;
+        canvas.height = dimensions.y;
+
+        var ctx = canvas.getContext("2d")
+        var imgBounds = imgOverlay.getBounds(),
+            bounds = new L.Bounds(
+                map.latLngToLayerPoint(imgBounds.getNorthWest()),
+                map.latLngToLayerPoint(imgBounds.getSouthEast())),
+            size = bounds.getSize();
+
+        var imageObj = new Image();
+        imageObj.src = imgOverlay._url;
+        ctx.globalAlpha = (imgOverlay.options && imgOverlay.options.opacity) ? imgOverlay.options.opacity : 1;
+
+        imageObj.onload = function () {
+            ctx.drawImage(imageObj, bounds.min.x, bounds.min.y, size.x, size.y);
+            callback(null, { canvas: canvas });
+        };
+    }    
 
     function handleTileLayer(layer, callback) {
         // `L.TileLayer.Canvas` was removed in leaflet 1.0
